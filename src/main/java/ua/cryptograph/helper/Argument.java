@@ -1,25 +1,22 @@
 package ua.cryptograph.helper;
 
 import ua.cryptograph.constant.Command;
-import ua.cryptograph.constant.Language;
-
 import java.nio.file.Path;
 
 public class Argument {
-    private final Language language;
     private final Command command;
     private final Path path;
     private final Integer key;
 
-    public Argument(Language language, Command command, Path path, Integer key) {
-        this.language = language;
-        this.command = command;
-        this.path = path;
-        this.key = key;
-    }
+    public Argument(String[] args) {
+        this.command = Command.valueOf(args[0]);
+        this.path = Path.of(args[1]);
 
-    public Language getLanguage() {
-        return language;
+        if (this.command != Command.BRUTE_FORCE) {
+            this.key = Integer.valueOf(args[2]);
+        } else {
+            key = null;
+        }
     }
 
     public Command getCommand() {
@@ -36,9 +33,7 @@ public class Argument {
 
     @Override
     public String toString() {
-        return "Argument{" +
-                "language=" + language +
-                ", command=" + command +
+        return "Argument{command=" + command +
                 ", path=" + path +
                 ", key=" + key +
                 '}';

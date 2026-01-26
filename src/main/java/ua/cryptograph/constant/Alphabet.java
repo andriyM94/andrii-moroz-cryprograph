@@ -1,9 +1,5 @@
 package ua.cryptograph.constant;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 public class Alphabet {
     private final String ua = "АаБбВвГгҐґДдЕеЄєЖжЗзИиІіЇїЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщьЮюЯя";
     private final String en = "AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz";
