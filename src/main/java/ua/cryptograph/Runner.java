@@ -1,79 +1,68 @@
 package ua.cryptograph;
 
 import ua.cryptograph.constant.Command;
-import ua.cryptograph.constant.Language;
 import ua.cryptograph.constant.Mode;
-import ua.cryptograph.helper.Argument;
-import ua.cryptograph.service.AlphabetService;
+import ua.cryptograph.DTO.Argument;
 import ua.cryptograph.service.EncryptionService;
 import ua.cryptograph.service.FileService;
 import ua.cryptograph.service.ValidationArgsService;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.nio.file.Path;
+
 
 public class Runner {
-    private final AlphabetService alphabetService;
     private final EncryptionService encryptionService;
     private final FileService fileService;
     private ValidationArgsService validationArgsService;
 
-    private Mode mode;
-
-    private Argument argument;
-
-    public Runner(String[] args, ValidationArgsService validationArgsService, AlphabetService alphabetService, EncryptionService encryptionService, FileService fileService) {
+    public Runner(ValidationArgsService validationArgsService, EncryptionService encryptionService, FileService fileService) {
         this.validationArgsService = validationArgsService;
-        this.alphabetService = alphabetService;
         this.encryptionService = encryptionService;
         this.fileService = fileService;
-
-        setMode(args);
-
-        if (this.mode == Mode.WITH_ARGS) {
-            validateCorrectNumberParams(args);
-            validationArgsService.validate();
-        }
-
-        setArgument(args);
     }
 
-    private void setArgument(String[] args) {
-        this.argument = new Argument(args);
-    }
-
-    private void validateCorrectNumberParams(String[] args) {
-        if (args.length == 2 && !args[0].equals(Command.BRUTE_FORCE.name())) {
-            throw new IllegalArgumentException("For ENCRYPT and DECRYPT, parameter 'key' must be present.");
-        }
-
-        if (args.length == 3 && args[0].equals(Command.BRUTE_FORCE.name())) {
-            throw new IllegalArgumentException("For BRUTE_FORCE, the presence of parameter 'ket' is unacceptable.");
-        }
-    }
-
-    public void run() {
-        if (mode == Mode.CLI) {
+    public void run(String[] args) {
+        if (getModeRunner(args) == Mode.CLI) {
             runCLI();
         } else {
-            runWithArgs();
+            runWithArgs(args);
         }
     }
 
-    private void runWithArgs() {
-        encryptionService.execute(this.argument);
+    private void runWithArgs(String[] args) {
+        validationArgsService.validateCorrectNumberAndTypeParams(args);
+
+        Argument argument = new Argument(args);
+
+        if (argument.getCommand() != Command.BRUTE_FORCE) {
+            Path pathFileToWrite = fileService.createFile(argument.getCommand(), argument.getPath());
+
+            try (BufferedReader bufferedReader = new BufferedReader(new FileReader(argument.getPath().toString()))) {
+                String line;
+                while ((line = bufferedReader.readLine()) != null) {
+                    String newLine = encryptionService.execute(argument.getCommand(), line, argument.getKey());
+                    fileService.writeLineToFile(newLine, pathFileToWrite);
+                }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 
     private void runCLI() {
         //todo
     }
 
-    private void setMode(String[] args) {
+    private Mode getModeRunner(String[] args) {
         if (args.length == 0) {
-            mode = Mode.CLI;
+            return Mode.CLI;
         } else if (args.length == 2 || args.length == 3) {
-            mode = Mode.WITH_ARGS;
+            return Mode.WITH_ARGS;
         } else {
-            //todo: create custom exception
-            throw new RuntimeException("Incorrect number of arguments");
+            throw new IllegalArgumentException("Incorrect number of arguments");
         }
     }
 }

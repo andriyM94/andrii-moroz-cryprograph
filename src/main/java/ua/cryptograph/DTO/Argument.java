@@ -1,4 +1,4 @@
-package ua.cryptograph.helper;
+package ua.cryptograph.DTO;
 
 import ua.cryptograph.constant.Command;
 import java.nio.file.Path;
@@ -15,7 +15,7 @@ public class Argument {
         if (this.command != Command.BRUTE_FORCE) {
             this.key = Integer.valueOf(args[2]);
         } else {
-            key = null;
+            key = 0;
         }
     }
 

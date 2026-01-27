@@ -6,37 +6,48 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class ValidationArgsService {
-    private final String[] args;
 
-    public ValidationArgsService(String[] args) {
-        this.args = args;
-    }
+    public void validateCorrectNumberAndTypeParams(String[] args) {
+        baseValidateArgs(args);
 
-    public void validate() {
-        validateCommand();
-        validateFilePath();
+        validateCommand(args[0]);
+        validateFilePath(args[1]);
 
         if (args.length == 3) {
-            validateKey();
+            validateKey(args[2]);
         }
     }
 
-    private void validateKey() {
-        int key = Integer.valueOf(args[2]);
+    private static void baseValidateArgs(String[] args) {
+        if (args.length < 2 || args.length > 3) {
+            throw new IllegalArgumentException("Uncorrected number of parameters");
+        }
 
-        if (key <= 0) {
+        if (args.length == 2 && !args[0].equals(Command.BRUTE_FORCE.name())) {
+            throw new IllegalArgumentException("For ENCRYPT and DECRYPT, parameter 'key' must be present.");
+        }
+
+        if (args.length == 3 && args[0].equals(Command.BRUTE_FORCE.name())) {
+            throw new IllegalArgumentException("For BRUTE_FORCE, the presence of parameter 'ket' is unacceptable.");
+        }
+    }
+
+    private void validateKey(String key) {
+        int keyLoc = Integer.valueOf(key);
+
+        if (keyLoc <= 0) {
             //todo: create custom exception
             throw new RuntimeException("Invalid parameter value key");
         }
     }
 
-    private void validateFilePath() {
-        if (!Files.exists(Path.of(this.args[1]))) {
+    private void validateFilePath(String path) {
+        if (!Files.exists(Path.of(path))) {
             throw new RuntimeException("Invalid path to file");
         }
     }
 
-    private void validateCommand() {
-        Command.valueOf(args[0]);
+    private void validateCommand(String command) {
+        Command.valueOf(command);
     }
 }
