@@ -1,6 +1,6 @@
 package ua.cryptograph.service;
 
-import ua.cryptograph.constant.Command;
+import ua.cryptograph.type.Command;
 
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
@@ -10,8 +10,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class FileService {
-    private final Command[] commandNameArr = Command.values();
-
     public void writeLineToFile(String line, Path pathFileToWrite) {
         try (FileWriter fileWriter = new FileWriter(pathFileToWrite.toString(), true);
              PrintWriter printWriter = new PrintWriter(fileWriter)) {
@@ -21,8 +19,8 @@ public class FileService {
         }
     }
 
-    public Path createFile(Command command, Path originalPath) {
-        String newFileName = createNewNameFileByCommand(command, originalPath);
+    public Path createFile(Command command, Path originalPath, int key) {
+        String newFileName = createNewNameFileByCommand(command, originalPath, key);
 
         Path newPath = Path.of(originalPath.getParent().toString(), newFileName);
 
@@ -45,7 +43,7 @@ public class FileService {
         }
     }
 
-    private String createNewNameFileByCommand(Command command, Path path) {
+    private String createNewNameFileByCommand(Command command, Path path, int key) {
         String fileName = path.getFileName().toString();
         String basePath = path.getParent().toString();
 
@@ -65,13 +63,19 @@ public class FileService {
 
         fileNameWithoutExtension = cleanFileName(fileNameWithoutExtension);
 
-        return  fileNameWithoutExtension + " [" + command.name() + "]" + extensionWithDot;
+        String keyStr = "";
+
+        if (command == Command.BRUTE_FORCE) {
+            keyStr = " " + key + " ";
+        }
+
+        return  fileNameWithoutExtension + " [" + command.name() + "]" + keyStr + extensionWithDot;
     }
 
     private String cleanFileName(String fileName) {
         String cleanedFileName = fileName;
 
-        for (Command command : commandNameArr) {
+        for (Command command : Command.values()) {
             cleanedFileName = cleanedFileName.replace("[" + command.name() + "]", "").trim();
         }
 

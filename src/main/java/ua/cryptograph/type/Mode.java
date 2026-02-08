@@ -1,4 +1,4 @@
-package ua.cryptograph.constant;
+package ua.cryptograph.type;
 
 public enum Mode {
     CLI,

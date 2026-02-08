@@ -1,10 +1,16 @@
 package ua.cryptograph.service;
 
-import ua.cryptograph.constant.Command;
+import ua.cryptograph.domain.Argument;
+import ua.cryptograph.type.Command;
 
-import java.util.ArrayList;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.nio.CharBuffer;
+import java.util.*;
 
 public class EncryptionService {
+    private final String pattern = "[\\s\\S]*[A-Za-zА-Яа-я], [A-Za-zА-Яа-я][\\s\\S]*";
     private final ArrayList<Character> alphabetCharArray;
 
     public EncryptionService(String alphabet) {
@@ -22,8 +28,7 @@ public class EncryptionService {
 
         return switch (command) {
             case Command.ENCRYPT -> encrypt(text, key);
-            case Command.DECRYPT -> decrypt(text, key);
-            default -> throw new IllegalStateException("Unexpected value: " + command);
+            case Command.DECRYPT, Command.BRUTE_FORCE -> decrypt(text, key);
         };
     }
 
@@ -58,22 +63,9 @@ public class EncryptionService {
             if (alphabetCharArray.contains(textCharArray[i])) {
                 int index = alphabetCharArray.indexOf(textCharArray[i]);
 
-                if (key < 0) {
-                    if(index + key < 0) {
-                        int correctKey = alphabetCharArray.size() + (index + key);
-                        newCharArr[i] = alphabetCharArray.get(correctKey);
-                    } else {
-                        newCharArr[i] = alphabetCharArray.get(index + key);
-                    }
-                } else {
-                    if(index + key + 1 > alphabetCharArray.size()) {
-                        int correctKey = index + key - alphabetCharArray.size();
-                        newCharArr[i] = alphabetCharArray.get(correctKey);
-                    } else {
-                        newCharArr[i] = alphabetCharArray.get(index + key);
-                    }
-                }
-
+                newCharArr[i] = alphabetCharArray.get(
+                        Math.floorMod(index + key, alphabetCharArray.size())
+                );
             } else {
                 newCharArr[i] = textCharArray[i];
             }
@@ -82,7 +74,29 @@ public class EncryptionService {
         return new String(newCharArr);
     }
 
-    private String bruteForce(String text) {
-        return "";
+    private int searchKeyValue(String text) {
+
+        for (int i = 0; i < alphabetCharArray.size(); i++) {
+            String decrypt = decrypt(text, i);
+            boolean containsPattern = decrypt.matches(pattern);
+            if (containsPattern) {
+                return i;
+            }
+        }
+
+        throw new RuntimeException("Error search key");
+    }
+
+    public int determineKeyForDecrypt(Argument argument) {
+        int key = 0;
+        try (BufferedReader bufferedReader = new BufferedReader(new FileReader(argument.getPath().toString()))) {
+            CharBuffer buffer = CharBuffer.wrap(new char[1000]);
+            if (bufferedReader.read(buffer) != 0) {
+                key = searchKeyValue(new String(buffer.array()));
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return key;
     }
 }

@@ -1,6 +1,6 @@
 package ua.cryptograph.service;
 
-import ua.cryptograph.constant.Command;
+import ua.cryptograph.type.Command;
 
 import java.nio.file.Files;
 import java.nio.file.Path;

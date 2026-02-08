@@ -6,10 +6,11 @@ import ua.cryptograph.service.ValidationArgsService;
 
 public class Main {
     public static void main(String[] args) {
-        String alphabet = "АаБбВвГгҐґДдЕеЄєЖжЗзИиІіЇїЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщьЮюЯя.,«»\"\\':!? ";
+        String alphabetUa = "АаБбВвГгҐґДдЕеЄєЖжЗзИиІіЇїЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщьЮюЯя.,«»\"\\':!? ";
+        String alphabetEn = "AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz.,«»\"\\':!? ";
 
         FileService fileService = new FileService();
-        EncryptionService encryptionService = new EncryptionService(alphabet);
+        EncryptionService encryptionService = new EncryptionService(alphabetEn);
         ValidationArgsService validationArgsService = new ValidationArgsService();
 
         Runner runner = new Runner(validationArgsService, encryptionService, fileService);

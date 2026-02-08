@@ -1,6 +1,6 @@
-package ua.cryptograph.DTO;
+package ua.cryptograph.domain;
 
-import ua.cryptograph.constant.Command;
+import ua.cryptograph.type.Command;
 import java.nio.file.Path;
 
 public class Argument {

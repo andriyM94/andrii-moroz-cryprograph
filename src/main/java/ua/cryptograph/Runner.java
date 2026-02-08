@@ -1,8 +1,8 @@
 package ua.cryptograph;
 
-import ua.cryptograph.constant.Command;
-import ua.cryptograph.constant.Mode;
-import ua.cryptograph.DTO.Argument;
+import ua.cryptograph.type.Command;
+import ua.cryptograph.type.Mode;
+import ua.cryptograph.domain.Argument;
 import ua.cryptograph.service.EncryptionService;
 import ua.cryptograph.service.FileService;
 import ua.cryptograph.service.ValidationArgsService;
@@ -16,7 +16,7 @@ import java.nio.file.Path;
 public class Runner {
     private final EncryptionService encryptionService;
     private final FileService fileService;
-    private ValidationArgsService validationArgsService;
+    private final ValidationArgsService validationArgsService;
 
     public Runner(ValidationArgsService validationArgsService, EncryptionService encryptionService, FileService fileService) {
         this.validationArgsService = validationArgsService;
@@ -37,18 +37,22 @@ public class Runner {
 
         Argument argument = new Argument(args);
 
-        if (argument.getCommand() != Command.BRUTE_FORCE) {
-            Path pathFileToWrite = fileService.createFile(argument.getCommand(), argument.getPath());
+        int key = argument.getKey();
 
-            try (BufferedReader bufferedReader = new BufferedReader(new FileReader(argument.getPath().toString()))) {
-                String line;
-                while ((line = bufferedReader.readLine()) != null) {
-                    String newLine = encryptionService.execute(argument.getCommand(), line, argument.getKey());
-                    fileService.writeLineToFile(newLine, pathFileToWrite);
-                }
-            } catch (IOException e) {
-                throw new RuntimeException(e);
+        if (argument.getCommand() == Command.BRUTE_FORCE) {
+            key = encryptionService.determineKeyForDecrypt(argument);
+        }
+
+        Path pathFileToWrite = fileService.createFile(argument.getCommand(), argument.getPath(), key);
+
+        try (BufferedReader bufferedReader = new BufferedReader(new FileReader(argument.getPath().toString()))) {
+            String line;
+            while ((line = bufferedReader.readLine()) != null) {
+                String newLine = encryptionService.execute(argument.getCommand(), line, key);
+                fileService.writeLineToFile(newLine, pathFileToWrite);
             }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 
