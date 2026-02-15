@@ -10,7 +10,7 @@ import java.nio.CharBuffer;
 import java.util.*;
 
 public class EncryptionService {
-    private final String pattern = "[\\s\\S]*[A-Za-zА-Яа-я], [A-Za-zА-Яа-я][\\s\\S]*";
+    private static final String pattern = "[\\s\\S]*[A-Za-zА-Яа-я], [A-Za-zА-Яа-я][\\s\\S]*";
     private final ArrayList<Character> alphabetCharArray;
 
     public EncryptionService(String alphabet) {
